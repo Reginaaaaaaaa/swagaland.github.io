@@ -108,7 +108,7 @@ function renderProfile() {
 
     <div class="info">
       <span><b>SEX</b> ${character.sex}</span>
-      <span><b>RELATIONSHIP</b> ${character.relationship}</span>
+      <span><b>RELATIONSHIP</b> ${character.relationship || "Не указано"}</span>
       <span><b>BIRTHDATE</b> ${character.birthday}</span>
     </div>
 
