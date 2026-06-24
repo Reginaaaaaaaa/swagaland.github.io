@@ -1,12 +1,12 @@
 const characters = [
   {
-    id: "elen",
-    name: "Элен Мур",
-    avatar: "images/avatars/elen.jpg",
-    sex: "женский",
-    position: "Финансовый аудитор",
+    id: "Felix",
+    name: "Феликс Стрейн",
+    avatar: "images/avatars/Felix_avatar.png",
+    sex: "мужской",
+    position: "верхняя",
     birthday: "8 января",
-    status: "Каждый несет в себе Тень, и чем меньше она воплощена в сознательной жизни индивида, тем она чернее и плотнее.",
+    status: "рэп баттл это моя жизнь",
     about: [
       "Люблю дождь",
       "Немного ночная сова",
@@ -15,8 +15,8 @@ const characters = [
     friends: ["william", "mortenax", "loren"],
     posts: [
       {
-        text: "На улице дождь, а Альва передает вам доброе утро ☁",
-        image: "images/posts/elen-post-1.jpg",
+        text: "Хайповых вайбов в ваш дом",
+        image: "images/posts/Felix_Post.png",
         tags: ["Ленивое утро", "Лапки", "Альва"],
         music: {
           title: "Soft Rain",
