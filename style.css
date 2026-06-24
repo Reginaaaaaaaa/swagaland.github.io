@@ -279,3 +279,37 @@ hr {
     color: white;
     text-decoration: underline;
 }
+
+.comments {
+  margin-top: 14px;
+  border-top: 1px solid #c9d8ec;
+  padding-top: 10px;
+}
+
+.comments h4 {
+  margin: 0 0 10px;
+  color: #234f86;
+  font-size: 14px;
+}
+
+.comment {
+  display: flex;
+  gap: 10px;
+  background: #f4f7fb;
+  border: 1px solid #d5e1f0;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.comment img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border: 1px solid #b8c9df;
+  padding: 2px;
+  background: white;
+}
+
+.comment-body p {
+  margin: 4px 0 0;
+}
