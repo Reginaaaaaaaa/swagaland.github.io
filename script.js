@@ -26,6 +26,42 @@ function createPost(post, author) {
       </div>
 
       <div class="date">${post.date}</div>
+
+      ${post.comments && post.comments.length > 0 ? `
+        <div class="comments">
+          <h4>Комментарии</h4>
+
+          ${post.comments.map(comment => {
+            const commentAuthor = getCharacter(comment.author);
+
+            if (!commentAuthor) {
+              return `
+                <div class="comment">
+                  <div class="comment-body">
+                    <b>Неизвестный пользователь</b>
+                    <p>${comment.text}</p>
+                  </div>
+                </div>
+              `;
+            }
+
+            return `
+              <div class="comment">
+                <a href="profile.html?id=${commentAuthor.id}">
+                  <img src="${commentAuthor.avatar}" alt="${commentAuthor.name}">
+                </a>
+
+                <div class="comment-body">
+                  <a href="profile.html?id=${commentAuthor.id}">
+                    <b>${commentAuthor.name}</b>
+                  </a>
+                  <p>${comment.text}</p>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      ` : ""}
     </article>
   `;
 }
