@@ -3,64 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Мой сайт</title>
+  <title>Общая лента</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="page">
+    <aside class="sidebar">
+      <h2>Блог</h2>
+      <p>Общая лента персонажей</p>
 
-  <header class="hero">
-    <nav>
-      <div class="logo">MySite</div>
-      <div class="nav-links">
-        <a href="#about">Обо мне</a>
-        <a href="#projects">Проекты</a>
-        <a href="#contacts">Контакты</a>
+      <div class="menu">
+        <a href="index.html">Главная лента</a>
       </div>
-    </nav>
+    </aside>
 
-    <div class="hero-content">
-      <h1>Привет, я создаю красивые идеи в интернете</h1>
-      <p>Это мой первый сайт на GitHub Pages. Здесь можно рассказать о себе, проектах, услугах или портфолио.</p>
-      <a class="button" href="#contacts">Связаться со мной</a>
-    </div>
-  </header>
+    <main class="content">
+      <h1>Общая лента</h1>
+      <div id="feed"></div>
+    </main>
 
-  <section id="about" class="section">
-    <h2>Обо мне</h2>
-    <p>
-      Здесь напиши пару предложений о себе: чем занимаешься, что умеешь,
-      какие проекты делаешь и почему с тобой стоит познакомиться.
-    </p>
-  </section>
+    <aside class="rightbar">
+      <h3>Интересные страницы</h3>
+      <div id="suggestions"></div>
+    </aside>
+  </div>
 
-  <section id="projects" class="section cards">
-    <h2>Мои проекты</h2>
-
-    <div class="card">
-      <h3>Проект 1</h3>
-      <p>Короткое описание проекта. Например: сайт, дизайн, блог, приложение или кейс.</p>
-    </div>
-
-    <div class="card">
-      <h3>Проект 2</h3>
-      <p>Еще одно описание. Можно добавить ссылки, картинки и результаты.</p>
-    </div>
-
-    <div class="card">
-      <h3>Проект 3</h3>
-      <p>Третий проект для красоты и солидности, как в маленькой цифровой витрине.</p>
-    </div>
-  </section>
-
-  <section id="contacts" class="section">
-    <h2>Контакты</h2>
-    <p>Telegram: @yourusername</p>
-    <p>Email: yourmail@example.com</p>
-  </section>
-
-  <footer>
-    <p>© 2026 MySite. Сделано на GitHub Pages.</p>
-  </footer>
-
+  <script src="data.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
