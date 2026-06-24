@@ -35,7 +35,7 @@ const characters = [
   },
   {
     id: "Brianna",
-    name: "Бри",
+    name: "Бри Миллер",
     avatar: "images/avatars/Bri_avatar.png",
     sex: "женский",
     relationship: "ЫЫЫЫЫЫ",
@@ -57,7 +57,7 @@ const characters = [
   },
   {
     id: "Nandi",
-    name: "Нанди",
+    name: "Нанди Сьюэлл",
     avatar: "images/avatars/mortenax.jpg",
     sex: "мужской",
     relationship: "ЫЫЫЫЫЫ",
@@ -81,7 +81,7 @@ const characters = [
   },
   {
     id: "Freya",
-    name: "Фрейя",
+    name: "Фрейя Хальгрен",
     avatar: "images/avatars/loren.jpg",
     sex: "женский",
     relationship: "ЫЫЫЫЫЫ",
