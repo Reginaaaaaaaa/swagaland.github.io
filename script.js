@@ -340,14 +340,15 @@ function setupPhotoModal() {
 
   if (!modal || !modalImage || !closeModal) return;
 
-  document.querySelectorAll(".gallery-photo, .gallery-preview img").forEach(photo => {
+  document.querySelectorAll(".gallery-photo").forEach(photo => {
     photo.onclick = () => {
       modalImage.src = photo.src;
       modal.classList.remove("hidden");
     };
   });
 
-  closeModal.onclick = () => {
+  closeModal.onclick = (event) => {
+    event.stopPropagation();
     modal.classList.add("hidden");
     modalImage.src = "";
   };
