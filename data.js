@@ -64,22 +64,20 @@ const characters = [
   {
     id: "Nandi",
     name: "Нанди Сьюэлл",
-    avatar: "images/avatars/mortenax.jpg",
+    avatar: "images/avatars/Nandi_avatar.png",
     sex: "мужской",
     relationship: "ЫЫЫЫЫЫ",
-    birthday: "22 октября",
-    status: "Некоторые двери лучше не открывать. Поэтому я их и открываю.",
+    birthday: "---",
+    status: "----",
     about: [
-      "Хожу там, где не надо",
-      "Собираю странные истории",
-      "Сплю редко"
+      "----",
     ],
-    friends: ["elen", "william"],
+    friends: ["Felix", "Freya", "Brianna"],
     posts: [
       {
-        text: "Если карта не показывает место, значит оно самое интересное.",
+        text: "---",
         image: "",
-        tags: ["Путь", "Запретное"],
+        tags: ["-", "--"],
         music: null,
         date: "27.05.2026"
       }
