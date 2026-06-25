@@ -13,6 +13,16 @@ const characters = [
       "Можете просить автограф уже сейчас"
     ],
     friends: ["Brianna", "Nandi", "Freya"],
+    
+    gallery: [
+      "images/gallery/Felix_Post2",
+      "images/gallery/Felix_avatar.png",
+      "images/gallery/elen_3.jpg",
+      "images/gallery/elen_4.jpg",
+      "images/gallery/elen_5.jpg",
+      "images/gallery/elen_6.jpg"
+    ],
+    
     posts: [
       {
         id: "Felix_Post2",
