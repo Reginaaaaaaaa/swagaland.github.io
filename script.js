@@ -201,11 +201,30 @@ function renderProfile() {
   profileHeader.innerHTML = `
     <h1>${character.name}</h1>
 
-    <div class="info">
-      <span><b>Пол</b> ${character.sex}</span>
-      <span><b>Статус отношений</b> ${character.relationship || "Не указано"}</span>
-      <span><b>Город</b> ${character.birthday}</span>
-    </div>
+    <div class="profile-info">
+
+    <h3>Информация</h3>
+
+    <table class="info-table">
+
+        <tr>
+            <td>Пол</td>
+            <td>${character.sex}</td>
+        </tr>
+
+        <tr>
+            <td>Отношения</td>
+            <td>${character.relationship || "Не указано"}</td>
+        </tr>
+
+        <tr>
+            <td>Город</td>
+            <td>${character.city || "Не указан"}</td>
+        </tr>
+
+    </table>
+
+</div>
 
     <p class="status">${character.status}</p>
   `;
