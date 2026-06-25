@@ -18,6 +18,14 @@ const characters = [
       "images/gallery/Felix_Post2.png",
       "images/gallery/Felix_Post.jpg"
     ],
+
+    playlist: [
+  {
+    artist: "Britney Spears",
+    title: "Toxic",
+    file: "music/Toxic.mp3"
+    }
+  ],
     
     posts: [
       {
