@@ -390,3 +390,29 @@ hr {
 .box p {
   line-height: 1.5;
 }
+
+.gallery-preview{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    margin-bottom:10px;
+}
+
+.gallery-preview img{
+    width:100%;
+    aspect-ratio:1;
+    object-fit:cover;
+    border:1px solid #c9d8ec;
+    cursor:pointer;
+}
+
+.gallery-preview img:hover{
+    opacity:.85;
+}
+
+.gallery-link{
+    display:block;
+    text-align:center;
+    margin-top:8px;
+    font-size:13px;
+}
