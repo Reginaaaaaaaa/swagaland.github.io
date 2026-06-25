@@ -288,3 +288,77 @@ if (document.getElementById("profileHeader")) {
     renderProfile();
   
 }
+
+function renderGalleryPage() {
+  const galleryHeader = document.getElementById("galleryHeader");
+  const galleryGrid = document.getElementById("galleryGrid");
+  const gallerySidebar = document.getElementById("gallerySidebar");
+
+  if (!galleryHeader || !galleryGrid || !gallerySidebar) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id") || "elen";
+  const character = getCharacter(id);
+
+  if (!character) {
+    galleryHeader.innerHTML = "<h1>Фотоальбом не найден</h1>";
+    return;
+  }
+
+  const photos = character.gallery || [];
+
+  gallerySidebar.innerHTML = `
+    <div class="profile-card">
+      <img class="big-avatar" src="${character.avatar}" alt="${character.name}">
+      <h2>${character.name}</h2>
+      <p class="online-status">● Сейчас онлайн</p>
+    </div>
+
+    <div class="box">
+      <h2>Навигация</h2>
+      <p><a href="profile.html?id=${character.id}">← Вернуться в профиль</a></p>
+      <p><a href="feed.html">← Общая лента</a></p>
+    </div>
+  `;
+
+  galleryHeader.innerHTML = `
+    <h1>Фото ${character.name}</h1>
+    <p class="gallery-count">Всего фотографий: ${photos.length}</p>
+  `;
+
+  galleryGrid.innerHTML = photos.map(photo => `
+    <img class="gallery-photo" src="${photo}" alt="Фото ${character.name}">
+  `).join("");
+
+  setupPhotoModal();
+}
+
+function setupPhotoModal() {
+  const modal = document.getElementById("photoModal");
+  const modalImage = document.getElementById("modalImage");
+  const closeModal = document.getElementById("closeModal");
+
+  if (!modal || !modalImage || !closeModal) return;
+
+  document.querySelectorAll(".gallery-photo, .gallery-preview img").forEach(photo => {
+    photo.onclick = () => {
+      modalImage.src = photo.src;
+      modal.classList.remove("hidden");
+    };
+  });
+
+  closeModal.onclick = () => {
+    modal.classList.add("hidden");
+    modalImage.src = "";
+  };
+
+  modal.onclick = (event) => {
+    if (event.target === modal) {
+      modal.classList.add("hidden");
+      modalImage.src = "";
+    }
+  };
+}
+
+renderGalleryPage();
+setupPhotoModal();
