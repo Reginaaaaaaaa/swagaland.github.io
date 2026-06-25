@@ -77,6 +77,16 @@ const characters = [
       "----",
     ],
     friends: ["Felix", "Freya", "Brianna"],
+
+    reposts: [
+    {
+      fromCharacter: "Felix",
+      postId: "Felix_Post2",
+      comment: null,
+      date: "24.06.2026"
+    }
+  ],
+    
     posts: [
       {
         text: "---",
