@@ -15,12 +15,8 @@ const characters = [
     friends: ["Brianna", "Nandi", "Freya"],
     
     gallery: [
-      "images/gallery/Felix_Post2",
-      "images/gallery/Felix_Post.jpg",
-      "images/gallery/elen_3.jpg",
-      "images/gallery/elen_4.jpg",
-      "images/gallery/elen_5.jpg",
-      "images/gallery/elen_6.jpg"
+      "images/gallery/Felix_Post2.png",
+      "images/gallery/Felix_Post.jpg"
     ],
     
     posts: [
