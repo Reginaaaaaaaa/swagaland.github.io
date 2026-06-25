@@ -186,6 +186,26 @@ function renderProfile() {
   </div>
 
   <div class="box">
+
+<h2>Фотоальбом</h2>
+
+<div class="gallery-preview">
+
+${(character.gallery || []).slice(0,6).map(photo=>`
+
+<img src="${photo}">
+
+`).join("")}
+
+</div>
+
+<a class="gallery-link" href="gallery.html?id=${character.id}">
+Все фотографии (${(character.gallery || []).length})
+</a>
+
+</div>
+
+  <div class="box">
     <h2>Друзья (${character.friends.length})</h2>
     <div class="friends">
       ${character.friends.map(friendId => {
