@@ -237,6 +237,11 @@ function renderProfile() {
       </div>
     `).join("")}
   </div>
+  
+  <a class="gallery-link" href="playlist.html?id=${character.id}">
+  Открыть весь плейлист (${(character.playlist || []).length})
+</a>
+
 </div>
 
   <div class="box">
@@ -490,9 +495,89 @@ function setupCustomPlayers() {
   });
 }
 
-renderSuggestions();
-renderFeed();
-renderProfile();
-renderGalleryPage();
-setupPhotoModal();
-setupCustomPlayers();
+function renderPlaylistPage() {
+  const playlistHeader = document.getElementById("playlistHeader");
+  const playlistList = document.getElementById("playlistList");
+  const playlistSidebar = document.getElementById("playlistSidebar");
+
+  if (!playlistHeader || !playlistList || !playlistSidebar) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id") || "Felix";
+  const character = getCharacter(id);
+
+  if (!character) {
+    playlistHeader.innerHTML = "<h1>Плейлист не найден</h1>";
+    return;
+  }
+
+  const tracks = character.playlist || [];
+
+  playlistSidebar.innerHTML = `
+    <div class="profile-card">
+      <img class="big-avatar" src="${character.avatar}" alt="${character.name}">
+      <h2>${character.name}</h2>
+      <p class="online-status">● Сейчас онлайн</p>
+    </div>
+
+    <div class="box">
+      <h2>Навигация</h2>
+      <p><a href="profile.html?id=${character.id}">← Вернуться в профиль</a></p>
+      <p><a href="feed.html">← Общая лента</a></p>
+    </div>
+  `;
+
+  playlistHeader.innerHTML = `
+    <h1>Музыка ${character.name}</h1>
+    <p class="gallery-count">Всего треков: ${tracks.length}</p>
+  `;
+
+  playlistList.innerHTML = tracks.map((track, index) => `
+    <div class="playlist-page-track custom-track">
+      <div class="track-number">${index + 1}</div>
+
+      <div class="track-info">
+        <div class="track-title">♪ ${track.artist} — ${track.title}</div>
+        <audio class="custom-audio" src="${track.file}"></audio>
+
+        <div class="player-controls">
+          <button class="play-button" type="button">▶</button>
+
+          <div class="player-main">
+            <input class="seek-bar" type="range" value="0" min="0" max="100">
+            <div class="time-row">
+              <span class="current-time">0:00</span>
+              <span class="duration">0:00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="volume-row">
+          <span>Громкость</span>
+          <input class="volume-bar" type="range" value="70" min="0" max="100">
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  setupCustomPlayers();
+}
+
+if (document.getElementById("feed")) {
+  renderSuggestions();
+  renderFeed();
+}
+
+if (document.getElementById("profileHeader")) {
+  renderProfile();
+  setupCustomPlayers();
+}
+
+if (document.getElementById("galleryHeader")) {
+  renderGalleryPage();
+  setupPhotoModal();
+}
+
+if (document.getElementById("playlistHeader")) {
+  renderPlaylistPage();
+}
