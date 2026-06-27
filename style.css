@@ -582,3 +582,35 @@ hr {
   font-size: 11px;
   color: #5c6f88;
 }
+
+.playlist-page-track {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  border: 1px solid #c9d8ec;
+  background: #f9fbff;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.track-number {
+  width: 32px;
+  height: 32px;
+  background: #e7eef8;
+  border: 1px solid #c9d8ec;
+  color: #234f86;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.track-info {
+  min-width: 0;
+}
+
+.playlist-page-track .track-title {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
