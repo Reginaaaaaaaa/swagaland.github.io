@@ -269,6 +269,13 @@ ${(character.gallery || []).slice(0,6).map(photo=>`
 
 </div>
 
+<div class="box">
+  <h2>Архив</h2>
+
+  <div id="miniCalendar"></div>
+
+</div>
+
   <div class="box">
     <h2>Друзья (${character.friends.length})</h2>
     <div class="friends">
@@ -339,6 +346,8 @@ profilePosts.innerHTML = profileItems
     return createRepost(item.content, character);
   })
   .join("");
+  
+  renderMiniCalendar(character);
 }
 
 if (document.getElementById("feed")) {
@@ -493,6 +502,64 @@ function setupCustomPlayers() {
       currentTimeText.textContent = "0:00";
     });
   });
+}
+
+function renderMiniCalendar(character) {
+
+    const container = document.getElementById("miniCalendar");
+
+    if (!container) return;
+
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = now.getMonth();
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const monthNames = [
+        "Январь","Февраль","Март","Апрель",
+        "Май","Июнь","Июль","Август",
+        "Сентябрь","Октябрь","Ноябрь","Декабрь"
+    ];
+
+    const week = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+
+    let html = `<div class="calendar-title">${monthNames[month]} ${year}</div>`;
+
+    html += `<div class="calendar-grid">`;
+
+    week.forEach(day=>{
+        html += `<div class="calendar-week">${day}</div>`;
+    });
+
+    let offset = firstDay === 0 ? 6 : firstDay-1;
+
+    for(let i=0;i<offset;i++){
+        html += `<div></div>`;
+    }
+
+    const postDays = character.posts.map(post=>{
+        const parts = post.date.split(".");
+        return Number(parts[0]);
+    });
+
+    for(let day=1;day<=daysInMonth;day++){
+
+        const active = postDays.includes(day);
+
+        html += `
+        <div class="calendar-day ${active ? "has-post":""}">
+            ${day}
+        </div>
+        `;
+    }
+
+    html += "</div>";
+
+    container.innerHTML = html;
+
 }
 
 function renderPlaylistPage() {
