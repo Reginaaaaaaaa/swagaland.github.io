@@ -165,7 +165,7 @@ function renderProfile() {
   if (!profileHeader || !profileSidebar || !profilePosts) return;
 
   const params = new URLSearchParams(window.location.search);
-  const id = params.get("id") || "elen";
+  const id = params.get("id") || "Felix";
   const character = getCharacter(id);
 
   if (!character) {
