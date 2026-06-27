@@ -127,7 +127,7 @@ const characters = [
       {
         text: "-",
         image: "images/posts/loren-post-1.jpg",
-        tags: [--"],
+        tags: ["--"],
         music: null,
         date: "26.05.2026"
       }
