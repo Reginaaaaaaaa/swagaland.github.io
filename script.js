@@ -210,10 +210,30 @@ function renderProfile() {
   <h2>Плейлист</h2>
 
   <div class="playlist">
-    ${(character.playlist || []).map(track => `
-      <div class="track">
+    ${(character.playlist || []).map((track, index) => `
+      <div class="track custom-track">
         <div class="track-title">♪ ${track.artist} — ${track.title}</div>
-        ${track.file ? `<audio controls src="${track.file}"></audio>` : ""}
+
+        ${track.file ? `
+          <audio class="custom-audio" src="${track.file}"></audio>
+
+          <div class="player-controls">
+            <button class="play-button" type="button">▶</button>
+
+            <div class="player-main">
+              <input class="seek-bar" type="range" value="0" min="0" max="100">
+              <div class="time-row">
+                <span class="current-time">0:00</span>
+                <span class="duration">0:00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="volume-row">
+            <span>Громкость</span>
+            <input class="volume-bar" type="range" value="70" min="0" max="100">
+          </div>
+        ` : ""}
       </div>
     `).join("")}
   </div>
@@ -324,7 +344,9 @@ if (document.getElementById("feed")) {
 }
 
 if (document.getElementById("profileHeader")) {
-    renderProfile();
+  renderProfile();
+  setupCustomPlayers();
+}
   
 }
 
@@ -369,7 +391,6 @@ function renderGalleryPage() {
     <img class="gallery-photo" src="${photo}" alt="Фото ${character.name}">
   `).join("");
 
-  setupPhotoModal();
 }
 
 function setupPhotoModal() {
@@ -400,5 +421,82 @@ function setupPhotoModal() {
   };
 }
 
+function setupCustomPlayers() {
+  const tracks = document.querySelectorAll(".custom-track");
+
+  tracks.forEach(track => {
+    const audio = track.querySelector(".custom-audio");
+    const playButton = track.querySelector(".play-button");
+    const seekBar = track.querySelector(".seek-bar");
+    const volumeBar = track.querySelector(".volume-bar");
+    const currentTimeText = track.querySelector(".current-time");
+    const durationText = track.querySelector(".duration");
+
+    if (!audio || !playButton || !seekBar || !volumeBar) return;
+
+    audio.volume = volumeBar.value / 100;
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return "0:00";
+
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+
+      return `${minutes}:${secs}`;
+    }
+
+    audio.addEventListener("loadedmetadata", () => {
+      durationText.textContent = formatTime(audio.duration);
+    });
+
+    playButton.addEventListener("click", () => {
+      document.querySelectorAll(".custom-audio").forEach(otherAudio => {
+        if (otherAudio !== audio) {
+          otherAudio.pause();
+
+          const otherTrack = otherAudio.closest(".custom-track");
+          const otherButton = otherTrack.querySelector(".play-button");
+          if (otherButton) otherButton.textContent = "▶";
+        }
+      });
+
+      if (audio.paused) {
+        audio.play();
+        playButton.textContent = "Ⅱ";
+      } else {
+        audio.pause();
+        playButton.textContent = "▶";
+      }
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (!audio.duration) return;
+
+      seekBar.value = (audio.currentTime / audio.duration) * 100;
+      currentTimeText.textContent = formatTime(audio.currentTime);
+    });
+
+    seekBar.addEventListener("input", () => {
+      if (!audio.duration) return;
+
+      audio.currentTime = (seekBar.value / 100) * audio.duration;
+    });
+
+    volumeBar.addEventListener("input", () => {
+      audio.volume = volumeBar.value / 100;
+    });
+
+    audio.addEventListener("ended", () => {
+      playButton.textContent = "▶";
+      seekBar.value = 0;
+      currentTimeText.textContent = "0:00";
+    });
+  });
+}
+
+renderSuggestions();
+renderFeed();
+renderProfile();
 renderGalleryPage();
 setupPhotoModal();
+setupCustomPlayers();
