@@ -268,6 +268,11 @@ function renderProfileSidebar(character) {
     </div>
 
     <div class="box">
+      <h2>О себе</h2>
+      ${(character.about || []).map(item => `<p>• ${item}</p>`).join("")}
+    </div>
+
+    <div class="box">
       <h2>Плейлист</h2>
 
       <div class="playlist">
@@ -280,8 +285,21 @@ function renderProfileSidebar(character) {
     </div>
 
     <div class="box">
-      <h2>О себе</h2>
-      ${(character.about || []).map(item => `<p>• ${item}</p>`).join("")}
+      <h2>Друзья (${(character.friends || []).length})</h2>
+
+      <div class="friends">
+        ${(character.friends || []).map(friendId => {
+          const friend = getCharacter(friendId);
+          if (!friend) return "";
+
+          return `
+            <a href="profile.html?id=${friend.id}">
+              <img src="${friend.avatar}" alt="${friend.name}">
+              <span>${friend.name}</span>
+            </a>
+          `;
+        }).join("")}
+      </div>
     </div>
 
     <div class="box">
@@ -303,24 +321,6 @@ function renderProfileSidebar(character) {
     <div class="box">
       <h2>Архив</h2>
       <div id="miniCalendar"></div>
-    </div>
-
-    <div class="box">
-      <h2>Друзья (${(character.friends || []).length})</h2>
-
-      <div class="friends">
-        ${(character.friends || []).map(friendId => {
-          const friend = getCharacter(friendId);
-          if (!friend) return "";
-
-          return `
-            <a href="profile.html?id=${friend.id}">
-              <img src="${friend.avatar}" alt="${friend.name}">
-              <span>${friend.name}</span>
-            </a>
-          `;
-        }).join("")}
-      </div>
     </div>
   `;
 }
