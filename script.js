@@ -371,17 +371,23 @@ function getProfileItems(character) {
   ];
 }
 
-function renderProfilePosts(character, filterDay = null) {
+function renderProfilePosts(character, filterDate = null) {
   const profilePosts = document.getElementById("profilePosts");
   if (!profilePosts) return;
 
   let items = getProfileItems(character);
 
-  if (filterDay !== null) {
+  if (filterDate !== null) {
     items = items.filter(item => {
       if (!item.date) return false;
-      const day = Number(item.date.split(".")[0]);
-      return day === filterDay;
+
+      const [day, month, year] = item.date.split(".").map(Number);
+
+      return (
+        day === filterDate.day &&
+        month === filterDate.month &&
+        year === filterDate.year
+      );
     });
   }
 
@@ -407,9 +413,22 @@ function renderMiniCalendar(character) {
   const container = document.getElementById("miniCalendar");
   if (!container) return;
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  const items = getProfileItems(character).filter(item => item.date);
+
+  if (items.length === 0) {
+    container.innerHTML = "<p>Записей пока нет.</p>";
+    return;
+  }
+
+  const latestDate = items
+    .map(item => {
+      const [day, month, year] = item.date.split(".").map(Number);
+      return new Date(year, month - 1, day);
+    })
+    .sort((a, b) => b - a)[0];
+
+  const year = latestDate.getFullYear();
+  const month = latestDate.getMonth();
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -421,13 +440,15 @@ function renderMiniCalendar(character) {
   ];
 
   const week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-  const items = getProfileItems(character);
 
-  const postDays = items
-    .filter(item => item.date)
-    .map(item => Number(item.date.split(".")[0]));
+  const activeDays = items
+    .map(item => item.date.split(".").map(Number))
+    .filter(([day, itemMonth, itemYear]) => {
+      return itemMonth === month + 1 && itemYear === year;
+    })
+    .map(([day]) => day);
 
-  let html = `<div class="calendar-title">${monthNames[month]} ${year}</div>`;
+  let html = `<div class="calendar-title">${monthNames[month]}</div>`;
   html += `<div class="calendar-grid">`;
 
   week.forEach(day => {
@@ -441,13 +462,15 @@ function renderMiniCalendar(character) {
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const active = postDays.includes(day);
+    const active = activeDays.includes(day);
 
     html += `
       <button 
         class="calendar-day ${active ? "has-post" : ""}" 
         type="button"
-        data-day="${day}">
+        data-day="${day}"
+        data-month="${month + 1}"
+        data-year="${year}">
         ${day}
       </button>
     `;
@@ -466,7 +489,14 @@ function renderMiniCalendar(character) {
   document.querySelectorAll(".calendar-day.has-post").forEach(button => {
     button.addEventListener("click", () => {
       const day = Number(button.dataset.day);
-      renderProfilePosts(character, day);
+      const selectedMonth = Number(button.dataset.month);
+      const selectedYear = Number(button.dataset.year);
+
+      renderProfilePosts(character, {
+        day,
+        month: selectedMonth,
+        year: selectedYear
+      });
     });
   });
 
@@ -478,7 +508,6 @@ function renderMiniCalendar(character) {
     });
   }
 }
-
 function renderGalleryPage() {
   const galleryHeader = document.getElementById("galleryHeader");
   const galleryGrid = document.getElementById("galleryGrid");
