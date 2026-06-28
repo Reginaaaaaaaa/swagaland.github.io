@@ -324,30 +324,63 @@ ${(character.gallery || []).slice(0,6).map(photo=>`
     <p class="status">${character.status}</p>
   `;
 
-  const profileItems = [
-  ...character.posts.map(post => ({
-    type: "post",
-    date: post.date,
-    content: post
-  })),
-  ...(character.reposts || []).map(repost => ({
-    type: "repost",
-    date: repost.date,
-    content: repost
-  }))
-];
-
-profilePosts.innerHTML = profileItems
-  .map(item => {
-    if (item.type === "post") {
-      return createPost(item.content, character);
-    }
-
-    return createRepost(item.content, character);
-  })
-  .join("");
+  renderProfilePosts(character);
+  renderMiniCalendar(character);
   
   renderMiniCalendar(character);
+}
+
+function renderProfilePosts(character) {
+  const profilePosts = document.getElementById("profilePosts");
+
+  if (!profilePosts) return;
+
+  const profileItems = [
+    ...character.posts.map(post => ({
+      type: "post",
+      date: post.date,
+      content: post
+    })),
+    ...(character.reposts || []).map(repost => ({
+      type: "repost",
+      date: repost.date,
+      content: repost
+    }))
+  ];
+
+  profilePosts.innerHTML = profileItems
+    .map(item => {
+      if (item.type === "post") {
+        return createPost(item.content, character);
+      }
+
+      return createRepost(item.content, character);
+    })
+    .join("");
+}
+
+function filterPostsByDay(character, day) {
+  const profilePosts = document.getElementById("profilePosts");
+
+  if (!profilePosts) return;
+
+  const filteredPosts = character.posts.filter(post => {
+    const parts = post.date.split(".");
+    return Number(parts[0]) === day;
+  });
+
+  if (filteredPosts.length === 0) {
+    profilePosts.innerHTML = `
+      <article class="post">
+        <p>В этот день записей нет.</p>
+      </article>
+    `;
+    return;
+  }
+
+  profilePosts.innerHTML = filteredPosts
+    .map(post => createPost(post, character))
+    .join("");
 }
 
 if (document.getElementById("feed")) {
@@ -505,61 +538,79 @@ function setupCustomPlayers() {
 }
 
 function renderMiniCalendar(character) {
+  const container = document.getElementById("miniCalendar");
 
-    const container = document.getElementById("miniCalendar");
+  if (!container) return;
 
-    if (!container) return;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
 
-    const now = new Date();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const year = now.getFullYear();
-    const month = now.getMonth();
+  const monthNames = [
+    "Январь", "Февраль", "Март", "Апрель",
+    "Май", "Июнь", "Июль", "Август",
+    "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+  ];
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
-    const monthNames = [
-        "Январь","Февраль","Март","Апрель",
-        "Май","Июнь","Июль","Август",
-        "Сентябрь","Октябрь","Ноябрь","Декабрь"
-    ];
+  let html = `<div class="calendar-title">${monthNames[month]} ${year}</div>`;
+  html += `<div class="calendar-grid">`;
 
-    const week = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+  week.forEach(day => {
+    html += `<div class="calendar-week">${day}</div>`;
+  });
 
-    let html = `<div class="calendar-title">${monthNames[month]} ${year}</div>`;
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
 
-    html += `<div class="calendar-grid">`;
+  for (let i = 0; i < offset; i++) {
+    html += `<div></div>`;
+  }
 
-    week.forEach(day=>{
-        html += `<div class="calendar-week">${day}</div>`;
+  const postDays = character.posts.map(post => {
+    const parts = post.date.split(".");
+    return Number(parts[0]);
+  });
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const active = postDays.includes(day);
+
+    html += `
+      <button class="calendar-day ${active ? "has-post" : ""}" 
+              type="button"
+              data-day="${day}">
+        ${day}
+      </button>
+    `;
+  }
+
+  html += "</div>";
+
+  html += `
+    <button id="showAllPosts" class="show-all-posts" type="button">
+      показать все записи
+    </button>
+  `;
+
+  container.innerHTML = html;
+
+  document.querySelectorAll(".calendar-day.has-post").forEach(button => {
+    button.addEventListener("click", () => {
+      const day = Number(button.dataset.day);
+      filterPostsByDay(character, day);
     });
+  });
 
-    let offset = firstDay === 0 ? 6 : firstDay-1;
+  const showAllButton = document.getElementById("showAllPosts");
 
-    for(let i=0;i<offset;i++){
-        html += `<div></div>`;
-    }
-
-    const postDays = character.posts.map(post=>{
-        const parts = post.date.split(".");
-        return Number(parts[0]);
+  if (showAllButton) {
+    showAllButton.addEventListener("click", () => {
+      renderProfilePosts(character);
     });
-
-    for(let day=1;day<=daysInMonth;day++){
-
-        const active = postDays.includes(day);
-
-        html += `
-        <div class="calendar-day ${active ? "has-post":""}">
-            ${day}
-        </div>
-        `;
-    }
-
-    html += "</div>";
-
-    container.innerHTML = html;
-
+  }
 }
 
 function renderPlaylistPage() {
