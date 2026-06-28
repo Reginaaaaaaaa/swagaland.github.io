@@ -652,3 +652,34 @@ hr {
 .calendar-day.has-post:hover{
     background:#4e73af;
 }
+
+.calendar-day {
+  text-align: center;
+  padding: 5px 0;
+  border: 1px solid #d7e2f1;
+  background: white;
+  font-size: 12px;
+  cursor: default;
+}
+
+.calendar-day.has-post {
+  background: #6c8fc9;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.show-all-posts {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid #c9d8ec;
+  background: #f4f7fb;
+  color: #234f86;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.show-all-posts:hover {
+  background: #e7eef8;
+}
