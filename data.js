@@ -136,7 +136,7 @@ const characters = [
   {
     id: "Jane",
     name: "Джейн Роуз",
-    avatar: "images/avatars/Freya_avatar.png",
+    avatar: "images/avatars/--.png",
     sex: "женский",
     relationship: "ЫЫЫЫЫЫ",
     city: "Не указано",
