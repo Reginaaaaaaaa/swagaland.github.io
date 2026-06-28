@@ -312,6 +312,11 @@ function renderProfileSidebar(character) {
       </div>
     </div>
 
+  <div class="box">
+  <h2>Связи</h2>
+  <p><a href="relations.html?id=${character.id}">Открыть карту связей →</a></p>
+</div>
+
     <div class="box">
       <h2>Фотоальбом</h2>
 
@@ -700,6 +705,62 @@ function setupCustomPlayers() {
   });
 }
 
+function renderRelationsPage() {
+  const relationsHeader = document.getElementById("relationsHeader");
+  const relationsMap = document.getElementById("relationsMap");
+  const relationsSidebar = document.getElementById("relationsSidebar");
+
+  if (!relationsHeader || !relationsMap || !relationsSidebar) return;
+
+  const character = getCurrentCharacter();
+
+  if (!character) {
+    relationsHeader.innerHTML = "<h1>Карта связей не найдена</h1>";
+    return;
+  }
+
+  const relations = character.relations || [];
+
+  relationsSidebar.innerHTML = createSimpleSidebar(character);
+
+  relationsHeader.innerHTML = `
+    <h1>Карта связей: ${character.name}</h1>
+    <p class="gallery-count">Связей: ${relations.length}</p>
+  `;
+
+  relationsMap.innerHTML = `
+    <div class="relations-map">
+      <div class="center-person">
+        <img src="${character.avatar}" alt="${character.name}">
+        <strong>${character.name}</strong>
+      </div>
+
+      <div class="relations-list">
+        ${relations.map(relation => {
+          const relatedCharacter = getCharacter(relation.character);
+
+          if (!relatedCharacter) return "";
+
+          return `
+            <div class="relation-card">
+              <a class="relation-person" href="profile.html?id=${relatedCharacter.id}">
+                <img src="${relatedCharacter.avatar}" alt="${relatedCharacter.name}">
+                <span>${relatedCharacter.name}</span>
+              </a>
+
+              <div class="relation-line">
+                <span>${relation.type}</span>
+              </div>
+
+              <p>${relation.note || ""}</p>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
 if (document.getElementById("feed")) {
   renderSuggestions();
   renderFeed();
@@ -715,4 +776,8 @@ if (document.getElementById("galleryHeader")) {
 
 if (document.getElementById("playlistHeader")) {
   renderPlaylistPage();
+}
+
+if (document.getElementById("relationsHeader")) {
+  renderRelationsPage();
 }
