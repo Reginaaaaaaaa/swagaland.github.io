@@ -31,6 +31,16 @@ function formatTime(seconds) {
   return `${minutes}:${secs}`;
 }
 
+function formatPostDate(date) {
+  if (!date) return "";
+
+  const parts = date.split(".");
+
+  if (parts.length < 2) return date;
+
+  return `${parts[0]}.${parts[1]}`;
+}
+
 function createPost(post, author) {
   return `
     <article class="post">
@@ -54,7 +64,7 @@ function createPost(post, author) {
         ${(post.tags || []).map(tag => `<span># ${tag}</span>`).join("")}
       </div>
 
-      <div class="date">${post.date || ""}</div>
+     <div class="date">${formatPostDate(post.date)}</div>
 
       ${createComments(post)}
     </article>
@@ -125,7 +135,7 @@ function createRepost(repost, repostAuthor) {
         ${createPost(original.post, original.author)}
       </div>
 
-      <div class="date">${repost.date || ""}</div>
+      <div class="date">${formatPostDate(repost.date)}</div>
     </article>
   `;
 }
