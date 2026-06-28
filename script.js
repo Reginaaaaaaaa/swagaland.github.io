@@ -2,19 +2,33 @@ function getCharacter(id) {
   return characters.find(character => character.id === id);
 }
 
+function getDefaultCharacter() {
+  return characters[0] || null;
+}
+
+function getCurrentCharacter() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  return getCharacter(id) || getDefaultCharacter();
+}
+
 function getPostById(characterId, postId) {
   const character = getCharacter(characterId);
-
   if (!character) return null;
 
-  const post = character.posts.find(post => post.id === postId);
-
+  const post = (character.posts || []).find(post => post.id === postId);
   if (!post) return null;
 
-  return {
-    post,
-    author: character
-  };
+  return { post, author: character };
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return "0:00";
+
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+
+  return `${minutes}:${secs}`;
 }
 
 function createPost(post, author) {
@@ -37,47 +51,53 @@ function createPost(post, author) {
       ` : ""}
 
       <div class="tags">
-        ${post.tags.map(tag => `<span># ${tag}</span>`).join("")}
+        ${(post.tags || []).map(tag => `<span># ${tag}</span>`).join("")}
       </div>
 
-      <div class="date">${post.date}</div>
+      <div class="date">${post.date || ""}</div>
 
-      ${post.comments && post.comments.length > 0 ? `
-        <div class="comments">
-          <h4>Комментарии</h4>
-
-          ${post.comments.map(comment => {
-            const commentAuthor = getCharacter(comment.author);
-
-            if (!commentAuthor) {
-              return `
-                <div class="comment">
-                  <div class="comment-body">
-                    <b>Неизвестный пользователь</b>
-                    <p>${comment.text}</p>
-                  </div>
-                </div>
-              `;
-            }
-
-            return `
-              <div class="comment">
-                <a href="profile.html?id=${commentAuthor.id}">
-                  <img src="${commentAuthor.avatar}" alt="${commentAuthor.name}">
-                </a>
-
-                <div class="comment-body">
-                  <a href="profile.html?id=${commentAuthor.id}">
-                    <b>${commentAuthor.name}</b>
-                  </a>
-                  <p>${comment.text}</p>
-                </div>
-              </div>
-            `;
-          }).join("")}
-        </div>
-      ` : ""}
+      ${createComments(post)}
     </article>
+  `;
+}
+
+function createComments(post) {
+  if (!post.comments || post.comments.length === 0) return "";
+
+  return `
+    <div class="comments">
+      <h4>Комментарии</h4>
+
+      ${post.comments.map(comment => {
+        const commentAuthor = getCharacter(comment.author);
+
+        if (!commentAuthor) {
+          return `
+            <div class="comment">
+              <div class="comment-body">
+                <b>Неизвестный пользователь</b>
+                <p>${comment.text}</p>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="comment">
+            <a href="profile.html?id=${commentAuthor.id}">
+              <img src="${commentAuthor.avatar}" alt="${commentAuthor.name}">
+            </a>
+
+            <div class="comment-body">
+              <a href="profile.html?id=${commentAuthor.id}">
+                <b>${commentAuthor.name}</b>
+              </a>
+              <p>${comment.text}</p>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
   `;
 }
 
@@ -105,8 +125,37 @@ function createRepost(repost, repostAuthor) {
         ${createPost(original.post, original.author)}
       </div>
 
-      <div class="date">${repost.date}</div>
+      <div class="date">${repost.date || ""}</div>
     </article>
+  `;
+}
+
+function createSmallPlayer(track) {
+  return `
+    <div class="track custom-track">
+      <div class="track-title">♪ ${track.artist} — ${track.title}</div>
+
+      ${track.file ? `
+        <audio class="custom-audio" src="${track.file}"></audio>
+
+        <div class="player-controls">
+          <button class="play-button" type="button">▶</button>
+
+          <div class="player-main">
+            <input class="seek-bar" type="range" value="0" min="0" max="100">
+            <div class="time-row">
+              <span class="current-time">0:00</span>
+              <span class="duration">0:00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="volume-row">
+          <span>Громкость</span>
+          <input class="volume-bar" type="range" value="70" min="0" max="100">
+        </div>
+      ` : ""}
+    </div>
   `;
 }
 
@@ -126,35 +175,33 @@ function renderFeed() {
   const feed = document.getElementById("feed");
   if (!feed) return;
 
-  const allPosts = [];
+  const allItems = [];
 
   characters.forEach(character => {
-  character.posts.forEach(post => {
-    allPosts.push({
-      type: "post",
-      post,
-      author: character
+    (character.posts || []).forEach(post => {
+      allItems.push({
+        type: "post",
+        post,
+        author: character
+      });
+    });
+
+    (character.reposts || []).forEach(repost => {
+      allItems.push({
+        type: "repost",
+        repost,
+        author: character
+      });
     });
   });
 
-  (character.reposts || []).forEach(repost => {
-    allPosts.push({
-      type: "repost",
-      repost,
-      author: character
-    });
-  });
-});
-
- feed.innerHTML = allPosts
-  .map(item => {
+  feed.innerHTML = allItems.map(item => {
     if (item.type === "post") {
       return createPost(item.post, item.author);
     }
 
     return createRepost(item.repost, item.author);
-  })
-  .join("");
+  }).join("");
 }
 
 function renderProfile() {
@@ -164,179 +211,154 @@ function renderProfile() {
 
   if (!profileHeader || !profileSidebar || !profilePosts) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id") || "Felix";
-  const character = getCharacter(id);
+  const character = getCurrentCharacter();
 
   if (!character) {
     profileHeader.innerHTML = "<h1>Персонаж не найден</h1>";
     return;
   }
 
+  renderProfileSidebar(character);
+  renderProfileHeader(character);
+  renderProfilePosts(character);
+  renderMiniCalendar(character);
+  setupCustomPlayers();
+}
+
+function renderProfileSidebar(character) {
+  const profileSidebar = document.getElementById("profileSidebar");
+
+  const commentsCount = (character.posts || []).reduce((sum, post) => {
+    return sum + ((post.comments || []).length);
+  }, 0);
+
+  const previewTracks = (character.playlist || []).slice(0, 3);
+
   profileSidebar.innerHTML = `
-  <div class="profile-card">
-    <img class="big-avatar" src="${character.avatar}" alt="${character.name}">
-    <h2>${character.name}</h2>
-    <p class="online-status">● Сейчас онлайн</p>
-  </div>
-
-  <div class="box">
-  <h2>Статистика</h2>
-
-  <div class="mini-stats">
-    <div>
-      <b>${character.posts.length}</b>
-      <span>Записей</span>
+    <div class="profile-card">
+      <img class="big-avatar" src="${character.avatar}" alt="${character.name}">
+      <h2>${character.name}</h2>
+      <p class="online-status">● Сейчас онлайн</p>
     </div>
 
-    <div>
-      <b>${(character.gallery || []).length}</b>
-      <span>Фото</span>
-    </div>
+    <div class="box">
+      <h2>Статистика</h2>
 
-    <div>
-      <b>${character.friends.length}</b>
-      <span>Друзей</span>
-    </div>
+      <div class="mini-stats">
+        <div>
+          <b>${(character.posts || []).length}</b>
+          <span>Записей</span>
+        </div>
 
-    <div>
-      <b>${character.posts.reduce((sum, post) => sum + ((post.comments || []).length), 0)}</b>
-      <span>Комментариев</span>
-    </div>
-  </div>
-</div>
+        <div>
+          <b>${(character.gallery || []).length}</b>
+          <span>Фото</span>
+        </div>
 
-<div class="box">
-  <h2>Плейлист</h2>
+        <div>
+          <b>${(character.friends || []).length}</b>
+          <span>Друзей</span>
+        </div>
 
-  <div class="playlist">
-    ${(character.playlist || []).map((track, index) => `
-      <div class="track custom-track">
-        <div class="track-title">♪ ${track.artist} — ${track.title}</div>
-
-        ${track.file ? `
-          <audio class="custom-audio" src="${track.file}"></audio>
-
-          <div class="player-controls">
-            <button class="play-button" type="button">▶</button>
-
-            <div class="player-main">
-              <input class="seek-bar" type="range" value="0" min="0" max="100">
-              <div class="time-row">
-                <span class="current-time">0:00</span>
-                <span class="duration">0:00</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="volume-row">
-            <span>Громкость</span>
-            <input class="volume-bar" type="range" value="70" min="0" max="100">
-          </div>
-        ` : ""}
+        <div>
+          <b>${commentsCount}</b>
+          <span>Комментариев</span>
+        </div>
       </div>
-    `).join("")}
-  </div>
-  
-  <a class="gallery-link" href="playlist.html?id=${character.id}">
-  Открыть весь плейлист (${(character.playlist || []).length})
-</a>
-
-</div>
-
-  <div class="box">
-    <h2>О себе</h2>
-    ${character.about.map(item => `<p>• ${item}</p>`).join("")}
-  </div>
-
-  <div class="box">
-
-<h2>Фотоальбом</h2>
-
-<div class="gallery-preview">
-
-${(character.gallery || []).slice(0,6).map(photo=>`
-
-<img src="${photo}">
-
-`).join("")}
-
-</div>
-
-<a class="gallery-link" href="gallery.html?id=${character.id}">
-Все фотографии (${(character.gallery || []).length})
-</a>
-
-</div>
-
-<div class="box">
-  <h2>Архив</h2>
-
-  <div id="miniCalendar"></div>
-
-</div>
-
-  <div class="box">
-    <h2>Друзья (${character.friends.length})</h2>
-    <div class="friends">
-      ${character.friends.map(friendId => {
-        const friend = getCharacter(friendId);
-        if (!friend) return "";
-        return `
-          <a href="profile.html?id=${friend.id}">
-            <img src="${friend.avatar}" alt="${friend.name}">
-            <span>${friend.name}</span>
-          </a>
-        `;
-      }).join("")}
     </div>
-  </div>
-`;
+
+    <div class="box">
+      <h2>Плейлист</h2>
+
+      <div class="playlist">
+        ${previewTracks.map(track => createSmallPlayer(track)).join("")}
+      </div>
+
+      <a class="gallery-link" href="playlist.html?id=${character.id}">
+        Открыть весь плейлист (${(character.playlist || []).length})
+      </a>
+    </div>
+
+    <div class="box">
+      <h2>О себе</h2>
+      ${(character.about || []).map(item => `<p>• ${item}</p>`).join("")}
+    </div>
+
+    <div class="box">
+      <h2>Фотоальбом</h2>
+
+      <div class="gallery-preview">
+        ${(character.gallery || []).slice(0, 6).map(photo => `
+          <a href="gallery.html?id=${character.id}">
+            <img src="${photo}" alt="Фото ${character.name}">
+          </a>
+        `).join("")}
+      </div>
+
+      <a class="gallery-link" href="gallery.html?id=${character.id}">
+        Все фотографии (${(character.gallery || []).length})
+      </a>
+    </div>
+
+    <div class="box">
+      <h2>Архив</h2>
+      <div id="miniCalendar"></div>
+    </div>
+
+    <div class="box">
+      <h2>Друзья (${(character.friends || []).length})</h2>
+
+      <div class="friends">
+        ${(character.friends || []).map(friendId => {
+          const friend = getCharacter(friendId);
+          if (!friend) return "";
+
+          return `
+            <a href="profile.html?id=${friend.id}">
+              <img src="${friend.avatar}" alt="${friend.name}">
+              <span>${friend.name}</span>
+            </a>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderProfileHeader(character) {
+  const profileHeader = document.getElementById("profileHeader");
 
   profileHeader.innerHTML = `
     <h1>${character.name}</h1>
 
     <div class="profile-info">
+      <h3>Информация</h3>
 
-    <h3>Информация</h3>
-
-    <table class="info-table">
-
+      <table class="info-table">
         <tr>
-            <td>Пол</td>
-            <td>${character.sex}</td>
+          <td>Пол</td>
+          <td>${character.sex || "Не указано"}</td>
         </tr>
 
         <tr>
-            <td>Отношения</td>
-            <td>${character.relationship || "Не указано"}</td>
+          <td>Отношения</td>
+          <td>${character.relationship || "Не указано"}</td>
         </tr>
 
         <tr>
-            <td>Город</td>
-            <td>${character.city || "Не указан"}</td>
+          <td>Город</td>
+          <td>${character.city || "Не указан"}</td>
         </tr>
+      </table>
+    </div>
 
-    </table>
-
-</div>
-
-    <p class="status">${character.status}</p>
+    <p class="status">${character.status || ""}</p>
   `;
-
-  renderProfilePosts(character);
-  renderMiniCalendar(character);
-  
-  renderMiniCalendar(character);
 }
 
-function renderProfilePosts(character) {
-  const profilePosts = document.getElementById("profilePosts");
-
-  if (!profilePosts) return;
-
-  const profileItems = [
-    ...character.posts.map(post => ({
+function getProfileItems(character) {
+  return [
+    ...(character.posts || []).map(post => ({
       type: "post",
       date: post.date,
       content: post
@@ -347,50 +369,114 @@ function renderProfilePosts(character) {
       content: repost
     }))
   ];
-
-  profilePosts.innerHTML = profileItems
-    .map(item => {
-      if (item.type === "post") {
-        return createPost(item.content, character);
-      }
-
-      return createRepost(item.content, character);
-    })
-    .join("");
 }
 
-function filterPostsByDay(character, day) {
+function renderProfilePosts(character, filterDay = null) {
   const profilePosts = document.getElementById("profilePosts");
-
   if (!profilePosts) return;
 
-  const filteredPosts = character.posts.filter(post => {
-    const parts = post.date.split(".");
-    return Number(parts[0]) === day;
-  });
+  let items = getProfileItems(character);
 
-  if (filteredPosts.length === 0) {
+  if (filterDay !== null) {
+    items = items.filter(item => {
+      if (!item.date) return false;
+      const day = Number(item.date.split(".")[0]);
+      return day === filterDay;
+    });
+  }
+
+  if (items.length === 0) {
     profilePosts.innerHTML = `
       <article class="post">
-        <p>В этот день записей нет.</p>
+        <p>Записей нет.</p>
       </article>
     `;
     return;
   }
 
-  profilePosts.innerHTML = filteredPosts
-    .map(post => createPost(post, character))
-    .join("");
+  profilePosts.innerHTML = items.map(item => {
+    if (item.type === "post") {
+      return createPost(item.content, character);
+    }
+
+    return createRepost(item.content, character);
+  }).join("");
 }
 
-if (document.getElementById("feed")) {
-    renderSuggestions();
-    renderFeed();
-}
+function renderMiniCalendar(character) {
+  const container = document.getElementById("miniCalendar");
+  if (!container) return;
 
-if (document.getElementById("profileHeader")) {
-  renderProfile();
-  setupCustomPlayers();
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const monthNames = [
+    "Январь", "Февраль", "Март", "Апрель",
+    "Май", "Июнь", "Июль", "Август",
+    "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+  ];
+
+  const week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  const items = getProfileItems(character);
+
+  const postDays = items
+    .filter(item => item.date)
+    .map(item => Number(item.date.split(".")[0]));
+
+  let html = `<div class="calendar-title">${monthNames[month]} ${year}</div>`;
+  html += `<div class="calendar-grid">`;
+
+  week.forEach(day => {
+    html += `<div class="calendar-week">${day}</div>`;
+  });
+
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+
+  for (let i = 0; i < offset; i++) {
+    html += `<div></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const active = postDays.includes(day);
+
+    html += `
+      <button 
+        class="calendar-day ${active ? "has-post" : ""}" 
+        type="button"
+        data-day="${day}">
+        ${day}
+      </button>
+    `;
+  }
+
+  html += "</div>";
+
+  html += `
+    <button id="showAllPosts" class="show-all-posts" type="button">
+      показать все записи
+    </button>
+  `;
+
+  container.innerHTML = html;
+
+  document.querySelectorAll(".calendar-day.has-post").forEach(button => {
+    button.addEventListener("click", () => {
+      const day = Number(button.dataset.day);
+      renderProfilePosts(character, day);
+    });
+  });
+
+  const showAllButton = document.getElementById("showAllPosts");
+
+  if (showAllButton) {
+    showAllButton.addEventListener("click", () => {
+      renderProfilePosts(character);
+    });
+  }
 }
 
 function renderGalleryPage() {
@@ -400,9 +486,7 @@ function renderGalleryPage() {
 
   if (!galleryHeader || !galleryGrid || !gallerySidebar) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id") || "elen";
-  const character = getCharacter(id);
+  const character = getCurrentCharacter();
 
   if (!character) {
     galleryHeader.innerHTML = "<h1>Фотоальбом не найден</h1>";
@@ -411,7 +495,58 @@ function renderGalleryPage() {
 
   const photos = character.gallery || [];
 
-  gallerySidebar.innerHTML = `
+  gallerySidebar.innerHTML = createSimpleSidebar(character);
+
+  galleryHeader.innerHTML = `
+    <h1>Фото ${character.name}</h1>
+    <p class="gallery-count">Всего фотографий: ${photos.length}</p>
+  `;
+
+  galleryGrid.innerHTML = photos.map(photo => `
+    <img class="gallery-photo" src="${photo}" alt="Фото ${character.name}">
+  `).join("");
+
+  setupPhotoModal();
+}
+
+function renderPlaylistPage() {
+  const playlistHeader = document.getElementById("playlistHeader");
+  const playlistList = document.getElementById("playlistList");
+  const playlistSidebar = document.getElementById("playlistSidebar");
+
+  if (!playlistHeader || !playlistList || !playlistSidebar) return;
+
+  const character = getCurrentCharacter();
+
+  if (!character) {
+    playlistHeader.innerHTML = "<h1>Плейлист не найден</h1>";
+    return;
+  }
+
+  const tracks = character.playlist || [];
+
+  playlistSidebar.innerHTML = createSimpleSidebar(character);
+
+  playlistHeader.innerHTML = `
+    <h1>Музыка ${character.name}</h1>
+    <p class="gallery-count">Всего треков: ${tracks.length}</p>
+  `;
+
+  playlistList.innerHTML = tracks.map((track, index) => `
+    <div class="playlist-page-track custom-track">
+      <div class="track-number">${index + 1}</div>
+
+      <div class="track-info">
+        ${createSmallPlayer(track)}
+      </div>
+    </div>
+  `).join("");
+
+  setupCustomPlayers();
+}
+
+function createSimpleSidebar(character) {
+  return `
     <div class="profile-card">
       <img class="big-avatar" src="${character.avatar}" alt="${character.name}">
       <h2>${character.name}</h2>
@@ -424,16 +559,6 @@ function renderGalleryPage() {
       <p><a href="feed.html">← Общая лента</a></p>
     </div>
   `;
-
-  galleryHeader.innerHTML = `
-    <h1>Фото ${character.name}</h1>
-    <p class="gallery-count">Всего фотографий: ${photos.length}</p>
-  `;
-
-  galleryGrid.innerHTML = photos.map(photo => `
-    <img class="gallery-photo" src="${photo}" alt="Фото ${character.name}">
-  `).join("");
-
 }
 
 function setupPhotoModal() {
@@ -450,13 +575,13 @@ function setupPhotoModal() {
     };
   });
 
-  closeModal.onclick = (event) => {
+  closeModal.onclick = event => {
     event.stopPropagation();
     modal.classList.add("hidden");
     modalImage.src = "";
   };
 
-  modal.onclick = (event) => {
+  modal.onclick = event => {
     if (event.target === modal) {
       modal.classList.add("hidden");
       modalImage.src = "";
@@ -479,15 +604,6 @@ function setupCustomPlayers() {
 
     audio.volume = volumeBar.value / 100;
 
-    function formatTime(seconds) {
-      if (isNaN(seconds)) return "0:00";
-
-      const minutes = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
-
-      return `${minutes}:${secs}`;
-    }
-
     audio.addEventListener("loadedmetadata", () => {
       durationText.textContent = formatTime(audio.duration);
     });
@@ -499,6 +615,7 @@ function setupCustomPlayers() {
 
           const otherTrack = otherAudio.closest(".custom-track");
           const otherButton = otherTrack.querySelector(".play-button");
+
           if (otherButton) otherButton.textContent = "▶";
         }
       });
@@ -537,150 +654,6 @@ function setupCustomPlayers() {
   });
 }
 
-function renderMiniCalendar(character) {
-  const container = document.getElementById("miniCalendar");
-
-  if (!container) return;
-
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const monthNames = [
-    "Январь", "Февраль", "Март", "Апрель",
-    "Май", "Июнь", "Июль", "Август",
-    "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
-  ];
-
-  const week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
-  let html = `<div class="calendar-title">${monthNames[month]} ${year}</div>`;
-  html += `<div class="calendar-grid">`;
-
-  week.forEach(day => {
-    html += `<div class="calendar-week">${day}</div>`;
-  });
-
-  const offset = firstDay === 0 ? 6 : firstDay - 1;
-
-  for (let i = 0; i < offset; i++) {
-    html += `<div></div>`;
-  }
-
-  const postDays = character.posts.map(post => {
-    const parts = post.date.split(".");
-    return Number(parts[0]);
-  });
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const active = postDays.includes(day);
-
-    html += `
-      <button class="calendar-day ${active ? "has-post" : ""}" 
-              type="button"
-              data-day="${day}">
-        ${day}
-      </button>
-    `;
-  }
-
-  html += "</div>";
-
-  html += `
-    <button id="showAllPosts" class="show-all-posts" type="button">
-      показать все записи
-    </button>
-  `;
-
-  container.innerHTML = html;
-
-  document.querySelectorAll(".calendar-day.has-post").forEach(button => {
-    button.addEventListener("click", () => {
-      const day = Number(button.dataset.day);
-      filterPostsByDay(character, day);
-    });
-  });
-
-  const showAllButton = document.getElementById("showAllPosts");
-
-  if (showAllButton) {
-    showAllButton.addEventListener("click", () => {
-      renderProfilePosts(character);
-    });
-  }
-}
-
-function renderPlaylistPage() {
-  const playlistHeader = document.getElementById("playlistHeader");
-  const playlistList = document.getElementById("playlistList");
-  const playlistSidebar = document.getElementById("playlistSidebar");
-
-  if (!playlistHeader || !playlistList || !playlistSidebar) return;
-
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id") || "Felix";
-  const character = getCharacter(id);
-
-  if (!character) {
-    playlistHeader.innerHTML = "<h1>Плейлист не найден</h1>";
-    return;
-  }
-
-  const tracks = character.playlist || [];
-
-  playlistSidebar.innerHTML = `
-    <div class="profile-card">
-      <img class="big-avatar" src="${character.avatar}" alt="${character.name}">
-      <h2>${character.name}</h2>
-      <p class="online-status">● Сейчас онлайн</p>
-    </div>
-
-    <div class="box">
-      <h2>Навигация</h2>
-      <p><a href="profile.html?id=${character.id}">← Вернуться в профиль</a></p>
-      <p><a href="feed.html">← Общая лента</a></p>
-    </div>
-  `;
-
-  playlistHeader.innerHTML = `
-    <h1>Музыка ${character.name}</h1>
-    <p class="gallery-count">Всего треков: ${tracks.length}</p>
-  `;
-
-  playlistList.innerHTML = tracks.map((track, index) => `
-    <div class="playlist-page-track custom-track">
-      <div class="track-number">${index + 1}</div>
-
-      <div class="track-info">
-        <div class="track-title">♪ ${track.artist} — ${track.title}</div>
-        <audio class="custom-audio" src="${track.file}"></audio>
-
-        <div class="player-controls">
-          <button class="play-button" type="button">▶</button>
-
-          <div class="player-main">
-            <input class="seek-bar" type="range" value="0" min="0" max="100">
-            <div class="time-row">
-              <span class="current-time">0:00</span>
-              <span class="duration">0:00</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="volume-row">
-          <span>Громкость</span>
-          <input class="volume-bar" type="range" value="70" min="0" max="100">
-        </div>
-      </div>
-    </div>
-  `).join("");
-
-  setupCustomPlayers();
-}
-
 if (document.getElementById("feed")) {
   renderSuggestions();
   renderFeed();
@@ -688,12 +661,10 @@ if (document.getElementById("feed")) {
 
 if (document.getElementById("profileHeader")) {
   renderProfile();
-  setupCustomPlayers();
 }
 
 if (document.getElementById("galleryHeader")) {
   renderGalleryPage();
-  setupPhotoModal();
 }
 
 if (document.getElementById("playlistHeader")) {
