@@ -827,6 +827,121 @@ function renderNewsFeed() {
     .join("");
 }
 
+function renderSitePlayer() {
+  const player = document.getElementById("sitePlayer");
+
+  if (!player) return;
+  if (typeof sitePlaylist === "undefined" || sitePlaylist.length === 0) return;
+
+  player.innerHTML = `
+    <div class="site-player-inner">
+      <button id="sitePlayButton" class="site-play-button" type="button">▶</button>
+
+      <div class="site-track-info">
+        <div id="siteTrackTitle" class="site-track-title"></div>
+
+        <div class="site-progress-row">
+          <span id="siteCurrentTime">0:00</span>
+          <input id="siteSeekBar" class="site-seek-bar" type="range" min="0" max="100" value="0">
+          <span id="siteDuration">0:00</span>
+        </div>
+      </div>
+
+      <button id="sitePrevButton" class="site-small-button" type="button">‹</button>
+      <button id="siteNextButton" class="site-small-button" type="button">›</button>
+
+      <div class="site-volume">
+        <span>Громкость</span>
+        <input id="siteVolumeBar" type="range" min="0" max="100" value="70">
+      </div>
+
+      <audio id="siteAudio"></audio>
+    </div>
+  `;
+
+  const audio = document.getElementById("siteAudio");
+  const playButton = document.getElementById("sitePlayButton");
+  const prevButton = document.getElementById("sitePrevButton");
+  const nextButton = document.getElementById("siteNextButton");
+  const title = document.getElementById("siteTrackTitle");
+  const seekBar = document.getElementById("siteSeekBar");
+  const volumeBar = document.getElementById("siteVolumeBar");
+  const currentTimeText = document.getElementById("siteCurrentTime");
+  const durationText = document.getElementById("siteDuration");
+
+  let currentTrackIndex = Number(localStorage.getItem("siteTrackIndex")) || 0;
+
+  function loadTrack(index) {
+    const track = sitePlaylist[index];
+
+    audio.src = track.file;
+    audio.volume = volumeBar.value / 100;
+    title.textContent = `${track.artist} — ${track.title}`;
+
+    localStorage.setItem("siteTrackIndex", index);
+  }
+
+  function playTrack() {
+    audio.play();
+    playButton.textContent = "Ⅱ";
+  }
+
+  function pauseTrack() {
+    audio.pause();
+    playButton.textContent = "▶";
+  }
+
+  function nextTrack() {
+    currentTrackIndex = (currentTrackIndex + 1) % sitePlaylist.length;
+    loadTrack(currentTrackIndex);
+    playTrack();
+  }
+
+  function prevTrack() {
+    currentTrackIndex =
+      (currentTrackIndex - 1 + sitePlaylist.length) % sitePlaylist.length;
+
+    loadTrack(currentTrackIndex);
+    playTrack();
+  }
+
+  loadTrack(currentTrackIndex);
+
+  playButton.onclick = () => {
+    if (audio.paused) {
+      playTrack();
+    } else {
+      pauseTrack();
+    }
+  };
+
+  nextButton.onclick = nextTrack;
+  prevButton.onclick = prevTrack;
+
+  audio.addEventListener("loadedmetadata", () => {
+    durationText.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener("timeupdate", () => {
+    if (!audio.duration) return;
+
+    seekBar.value = (audio.currentTime / audio.duration) * 100;
+    currentTimeText.textContent = formatTime(audio.currentTime);
+  });
+
+  seekBar.addEventListener("input", () => {
+    if (!audio.duration) return;
+
+    audio.currentTime = (seekBar.value / 100) * audio.duration;
+  });
+
+  volumeBar.addEventListener("input", () => {
+    audio.volume = volumeBar.value / 100;
+  });
+
+  audio.addEventListener("ended", nextTrack);
+}
+
 if (document.getElementById("feed")) {
   renderSuggestions();
   renderFeed();
@@ -851,3 +966,5 @@ if (document.getElementById("playlistHeader")) {
 if (document.getElementById("relationsHeader")) {
   renderRelationsPage();
 }
+
+renderSitePlayer();
