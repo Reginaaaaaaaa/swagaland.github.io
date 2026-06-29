@@ -121,11 +121,11 @@ const characters = [
     
     posts: [
       {
-        text: "---",
-        image: "",
-        tags: ["-", "--"],
+        text: null,
+        image: "images/posts/Nandi_Post.png",
+        tags: ["БингБонг", "НетНаркотикам"],
         music: null,
-        date: "27.05.2026"
+        date: "29.06.2026"
       }
     ]
   },
