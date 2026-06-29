@@ -192,3 +192,16 @@ const news = [
     image: ""
   }
 ];
+
+const sitePlaylist = [
+  {
+    artist: "Britney Spears",
+    title: "Toxic",
+    file: "music/Toxic.mp3"
+  },
+  {
+    artist: "Example Artist",
+    title: "Example Song",
+    file: "music/Toxic.mp3"
+  }
+];
