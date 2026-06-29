@@ -853,3 +853,71 @@ hr {
   margin: 4px 0 10px;
   color: #234f86;
 }
+
+body {
+  padding-bottom: 78px;
+}
+
+.site-player {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #e7eef8;
+  border-top: 1px solid #9fb6d4;
+  z-index: 1000;
+}
+
+.site-player-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 42px 1fr 30px 30px 180px;
+  gap: 10px;
+  align-items: center;
+}
+
+.site-play-button,
+.site-small-button {
+  border: 1px solid #244c80;
+  background: #2f5f9f;
+  color: white;
+  cursor: pointer;
+  height: 32px;
+}
+
+.site-track-title {
+  color: #234f86;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.site-progress-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: #5c6f88;
+}
+
+.site-seek-bar,
+.site-volume input {
+  width: 100%;
+}
+
+.site-volume {
+  font-size: 11px;
+  color: #5c6f88;
+}
+
+@media (max-width: 800px) {
+  .site-player-inner {
+    grid-template-columns: 36px 1fr 28px 28px;
+  }
+
+  .site-volume {
+    display: none;
+  }
+}
