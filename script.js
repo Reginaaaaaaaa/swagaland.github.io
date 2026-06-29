@@ -829,6 +829,7 @@ function renderNewsFeed() {
 
 function renderSitePlayer() {
   const player = document.getElementById("sitePlayer");
+  const body = document.body;
 
   if (!player) return;
   if (typeof sitePlaylist === "undefined" || sitePlaylist.length === 0) return;
@@ -881,15 +882,31 @@ function renderSitePlayer() {
     localStorage.setItem("siteTrackIndex", index);
   }
 
-  function playTrack() {
-    audio.play();
-    playButton.textContent = "Ⅱ";
-  }
+  function showPlayer(){
+    player.classList.add("visible");
+    body.classList.add("player-open");
+}
 
-  function pauseTrack() {
+function hidePlayer(){
+    player.classList.remove("visible");
+    body.classList.remove("player-open");
+}
+
+function playTrack(){
+
+    showPlayer();
+
+    audio.play();
+
+    playButton.textContent="Ⅱ";
+}
+
+function pauseTrack(){
+
     audio.pause();
-    playButton.textContent = "▶";
-  }
+
+    playButton.textContent="▶";
+}
 
   function nextTrack() {
     currentTrackIndex = (currentTrackIndex + 1) % sitePlaylist.length;
@@ -939,7 +956,21 @@ function renderSitePlayer() {
     audio.volume = volumeBar.value / 100;
   });
 
-  audio.addEventListener("ended", nextTrack);
+  audio.addEventListener("ended", () => {
+
+    if(currentTrackIndex===sitePlaylist.length-1){
+
+        pauseTrack();
+
+        hidePlayer();
+
+    }else{
+
+        nextTrack();
+
+    }
+
+});
 }
 
 if (document.getElementById("feed")) {
