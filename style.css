@@ -854,8 +854,13 @@ hr {
   color: #234f86;
 }
 
-body {
-  padding-bottom: 78px;
+body{
+    padding-bottom:0;
+    transition:padding .25s;
+}
+
+body.player-open{
+    padding-bottom:78px;
 }
 
 .site-player {
