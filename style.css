@@ -832,3 +832,24 @@ hr {
   font-size: 12px;
   line-height: 1.4;
 }
+
+.news-post {
+  background: #fffdf2;
+  border-left: 4px solid #6c8fc9;
+}
+
+.news-label {
+  display: inline-block;
+  background: #e7eef8;
+  border: 1px solid #c9d8ec;
+  color: #234f86;
+  font-size: 11px;
+  padding: 3px 7px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.news-post h2 {
+  margin: 4px 0 10px;
+  color: #234f86;
+}
